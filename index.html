@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="my" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>လှည်းကူးမြို့နယ်၏ Foreign Visa စာရင်း - Form C (Secure Edition)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SheetJS for Excel Import/Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Google Fonts for Myanmar Text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Pyidaungsu:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mm: ['Pyidaungsu', 'Padauk', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Pyidaungsu', 'Padauk', sans-serif;
+            background-color: #f8fafc;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; font-size: 10pt; }
+            .print-only { display: block !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #334155 !important; padding: 4px 6px !important; font-size: 9pt !important; }
+            th { background-color: #f1f5f9 !important; color: black !important; }
+            @page { size: A4 landscape; margin: 10mm; }
+        }
+        .table-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .table-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-mm">
+
+    <!-- LOGIN MODAL (Passcode Text Hidden) -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-brand-100 text-brand-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                    <i class="fa-solid fa-passport text-3xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-800">Form-C Management System</h2>
+                <p class="text-xs text-slate-500 mt-1">လှည်းကူးမြို့နယ် နိုင်ငံခြားသားများ စာရင်းစနစ်</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Username</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="loginUsername" required class="w-full pl-10 pr-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none" placeholder="Username ရိုက်ထည့်ပါ">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="password" id="loginPassword" required class="w-full pl-10 pr-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none" placeholder="Password ရိုက်ထည့်ပါ">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition-all shadow-md">
+                    စနစ်ထဲသို့ ဝင်မည် (Login)
+                </button>
+            </form>
+
+            <div class="mt-4 pt-4 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-500">အကောင့်မရှိသေးပါက? <button onclick="toggleRegisterView(true)" class="text-brand-600 font-bold hover:underline">အကောင့်သစ် လျှောက်ထားရန်</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGISTER MODAL -->
+    <div id="registerModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100">
+            <div class="text-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800">အကောင့်သစ် လျှောက်ထားရန်</h2>
+                <p class="text-xs text-slate-500 mt-1">Admin မှ အတည်ပြုပြီးမှ အသုံးပြုနိုင်မည်ဖြစ်သည်</p>
+            </div>
+
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Username သစ်</label>
+                    <input type="text" id="regUsername" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="regPassword" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="toggleRegisterView(false)" class="flex-1 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-sm">မလုပ်တော့ပါ</button>
+                    <button type="submit" class="flex-1 py-2 bg-brand-600 text-white font-bold rounded-xl text-sm">လျှောက်ထားမည်</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Top Header -->
+    <header class="bg-brand-800 text-white shadow-md no-print sticky top-0 z-30">
+        <div class="max-w-[96%] mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="p-2.5 bg-white/10 rounded-xl">
+                        <i class="fa-solid fa-passport text-2xl text-yellow-400"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold leading-tight">
+                            လှည်းကူးမြို့နယ်၏ Business Visa အမျိုးမျိုးဖြင့်ဝင်ရောက်လာသည့် စက်ရုံ/အလုပ်ရုံ/ကုမ္ပဏီများတွင် အလုပ်လုပ်ကိုင်နေသောနိုင်ငံခြားသားစာရင်း
+                        </h1>
+                        <p class="text-xs text-brand-100 mt-0.5">Form-C Foreign Workers Management System</p>
+                    </div>
+                </div>
+
+                <!-- User Info & Logout -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-brand-900/50 px-3 py-1.5 rounded-xl border border-brand-700/50 text-right">
+                        <div id="currentUserDisplay" class="text-xs font-bold text-yellow-300">Logged in: -</div>
+                        <div id="currentRoleDisplay" class="text-[10px] text-slate-200">Role: -</div>
+                    </div>
+                    <button id="adminMgmtBtn" onclick="openAdminUserModal()" class="hidden bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-users-cog"></i> Users
+                    </button>
+                    <button onclick="handleLogout()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-[96%] w-full mx-auto px-2 sm:px-4 lg:px-6 py-5">
+        
+        <!-- Summary Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 no-print">
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs text-slate-500">စုစုပေါင်း စာရင်း</div>
+                <div id="stat-total" class="text-xl font-bold text-slate-800">0</div>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs text-slate-500">ကျား / မ ခွဲခြားမှု</div>
+                <div class="text-sm font-bold text-slate-800"><span id="stat-male" class="text-blue-600">0</span> / <span id="stat-female" class="text-pink-600">0</span></div>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs text-slate-500">Overstay ဖြစ်နေသူများ</div>
+                <div id="stat-overstay" class="text-xl font-bold text-rose-600">0</div>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs text-slate-500">နိုင်ငံပေါင်း</div>
+                <div id="stat-nations" class="text-xl font-bold text-emerald-600">0</div>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs text-slate-500">ပယ်ဖျက်ထားသည့် စာရင်း</div>
+                <div id="stat-deleted" class="text-xl font-bold text-rose-500">0</div>
+            </div>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div class="no-print bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-5 space-y-3">
+            
+            <!-- Row 1: Search and Type -->
+            <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" onkeyup="handleSearch()" 
+                        placeholder="အမည်၊ ပတ်စ်ပို့၊ ဗီဇာ၊ ကုမ္ပဏီ သို့မဟုတ် နိုင်ငံသားဖြင့် ရှာဖွေပါ..." 
+                        class="w-full pl-10 pr-10 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="genderFilter" onchange="handleSearch()" class="px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl outline-none">
+                        <option value="">ကျား/မ အားလုံး</option>
+                        <option value="ကျား">ကျား</option>
+                        <option value="မ">မ</option>
+                    </select>
+
+                    <select id="nationFilter" onchange="handleSearch()" class="px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl outline-none">
+                        <option value="">နိုင်ငံသား အားလုံး</option>
+                    </select>
+
+                    <select id="overstayFilter" onchange="handleSearch()" class="px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl outline-none font-bold text-rose-600">
+                        <option value="">Status အားလုံး</option>
+                        <option value="overstay">Overstay သာလျှင်</option>
+                        <option value="valid">သက်တမ်းရှိ သာလျှင်</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 2: Date Filter (ရက်စွဲအလိုက် စိစစ်မှု) & Actions -->
+            <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 pt-3 border-t border-slate-100">
+                <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <span class="text-xs font-bold text-slate-600"><i class="fa-solid fa-calendar-day mr-1"></i>ရက်စွဲအလိုက် စိစစ်ရန်:</span>
+                    <select id="recordTypeFilter" onchange="handleSearch()" class="px-2 py-1 text-xs border border-slate-300 rounded-lg bg-white font-bold text-brand-700">
+                        <option value="active">ဖြည့်သွင်း စာရင်းများ</option>
+                        <option value="deleted">ပယ်ဖျက်ထား စာရင်းများ</option>
+                    </select>
+                    <input type="date" id="dateFrom" onchange="handleSearch()" class="px-2 py-1 text-xs border border-slate-300 rounded-lg bg-white" title="စတင်ရက်">
+                    <span class="text-xs text-slate-400">မှ</span>
+                    <input type="date" id="dateTo" onchange="handleSearch()" class="px-2 py-1 text-xs border border-slate-300 rounded-lg bg-white" title="ပြီးဆုံးရက်">
+                    <button onclick="clearDateFilter()" class="px-2 py-1 text-xs text-rose-600 hover:bg-rose-50 rounded-lg">ပြန်စတင်မည်</button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="openFormModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-medium shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>စာရင်းသစ်</span>
+                    </button>
+
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
+                    <button onclick="document.getElementById('excelFileInput').click()" class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-sm font-medium">
+                        <i class="fa-solid fa-file-import"></i> Excel သွင်းမည်
+                    </button>
+
+                    <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-medium">
+                        <i class="fa-solid fa-file-excel"></i> Excel ထုတ်မည်
+                    </button>
+
+                    <button onclick="triggerPrint()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-sm font-medium">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table Container -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto table-scrollbar">
+                <table class="w-full text-left text-xs sm:text-sm text-slate-700 border-collapse">
+                    <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 text-xs">
+                        <tr>
+                            <th rowspan="2" class="p-2 text-center w-10 border-r border-slate-200">စဉ်</th>
+                            <th rowspan="2" class="p-2 min-w-[130px] border-r border-slate-200">အမည်</th>
+                            <th rowspan="2" class="p-2 min-w-[110px] border-r border-slate-200">Passport No</th>
+                            <th rowspan="2" class="p-2 min-w-[110px] border-r border-slate-200">လူမျိုး/နိုင်ငံသား</th>
+                            <th rowspan="2" class="p-2 text-center min-w-[60px] border-r border-slate-200">ကျား/မ</th>
+                            <th rowspan="2" class="p-2 min-w-[110px] border-r border-slate-200">Visa အမှတ်</th>
+                            <th colspan="3" class="p-2 text-center border-r border-slate-200 bg-emerald-100/60 text-emerald-900 border-b border-emerald-200">နေခွင့်သက်တမ်း</th>
+                            <th rowspan="2" class="p-2 min-w-[110px] text-center border-r border-slate-200">Overstay အခြေအနေ</th>
+                            <th rowspan="2" class="p-2 min-w-[140px] border-r border-slate-200">မှတ်တမ်း ရက်စွဲ</th>
+                            <th rowspan="2" class="p-2 min-w-[180px] border-r border-slate-200">စက်ရုံ/ကုမ္ပဏီ</th>
+                            <th rowspan="2" class="p-2 text-center min-w-[90px] no-print">လုပ်ဆောင်ချက်</th>
+                        </tr>
+                        <tr class="bg-emerald-50 text-emerald-900 text-xs">
+                            <th class="p-1.5 text-center min-w-[90px] border-r border-slate-200">မှ</th>
+                            <th class="p-1.5 text-center min-w-[90px] border-r border-slate-200">ထိ</th>
+                            <th class="p-1.5 text-center min-w-[70px] border-r border-slate-200">ရက်ပေါင်း</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workerTableBody" class="divide-y divide-slate-200">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-12 text-center">
+                <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-2"></i>
+                <h3 class="text-slate-700 font-bold text-base">မည်သည့် အချက်အလက်မျှ မရှိသေးပါ။</h3>
+            </div>
+        </div>
+    </main>
+
+    <!-- ADMIN USER MANAGEMENT MODAL -->
+    <div id="adminUserModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 border border-slate-200">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-users-cog text-amber-500 mr-2"></i>User Accounts စီမံခန့်ခွဲခြင်း (Admin Only)</h3>
+                <button onclick="closeAdminUserModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700">
+                            <th class="p-2 border">Username</th>
+                            <th class="p-2 border">Role</th>
+                            <th class="p-2 border text-center">Status</th>
+                            <th class="p-2 border text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORM (Add/Edit Worker) -->
+    <div id="formModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-3.5 bg-slate-900 text-white flex justify-between items-center">
+                <h3 id="modalTitle" class="text-base font-bold">စာရင်းသစ် ထည့်သွင်းခြင်း</h3>
+                <button onclick="closeFormModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <form id="workerForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto space-y-4">
+                <input type="hidden" id="editIndex" value="-1">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">အမည် *</label>
+                        <input type="text" id="name" required class="w-full px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Passport No *</label>
+                        <input type="text" id="passportNo" required class="w-full px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">လူမျိုး / နိုင်ငံသား *</label>
+                        <input type="text" id="nationality" required class="w-full px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none" placeholder="ဥပမာ- တရုတ်">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ကျား / မ *</label>
+                        <select id="gender" required class="w-full px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none">
+                            <option value="ကျား">ကျား</option>
+                            <option value="မ">မ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Visa အမှတ် *</label>
+                        <input type="text" id="visaNo" required class="w-full px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ကုမ္ပဏီ/စက်ရုံ *</label>
+                        <input type="text" id="companyName" required class="w-full px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">နေခွင့် စတင်ရက် *</label>
+                        <input type="date" id="stayStartDate" required onchange="calculateDays()" class="w-full px-3 py-1.5 text-sm border rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">နေခွင့် ကုန်ဆုံးရက် *</label>
+                        <input type="date" id="stayEndDate" required onchange="calculateDays()" class="w-full px-3 py-1.5 text-sm border rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">ရက်ပေါင်း</label>
+                        <input type="number" id="stayTotalDays" readonly class="w-full px-3 py-1.5 text-sm bg-emerald-100 font-bold border rounded-lg outline-none cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">တည်းခိုနေထိုင်သည့် လိပ်စာ *</label>
+                    <textarea id="residenceAddress" rows="2" required class="w-full px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none resize-none"></textarea>
+                </div>
+
+                <div class="pt-3 border-t flex justify-end gap-2">
+                    <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold">မလုပ်တော့ပါ</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold">သိမ်းဆည်းမည်</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        const defaultUsers = [
+            { username: 'admin', password: 'admin123', role: 'admin', status: 'approved' },
+            { username: 'user', password: 'user123', role: 'user', status: 'approved' }
+        ];
+
+        const getTodayISO = () => new Date().toISOString().split('T')[0];
+
+        const initialWorkersData = [
+            {
+                name: "MR. WANG LEI",
+                passportNo: "EJ8923411",
+                nationality: "တရုတ်",
+                gender: "ကျား",
+                visaNo: "EV-902341",
+                stayStartDate: "2023-01-10",
+                stayEndDate: "2023-12-09",
+                stayTotalDays: 334,
+                companyName: "Great Wall Garment Co.,Ltd",
+                residenceAddress: "လှည်းကူးမြို့နယ်",
+                createdAt: getTodayISO()
+            },
+            {
+                name: "MS. LIN CHEN",
+                passportNo: "E78901234",
+                nationality: "တရုတ်",
+                gender: "မ",
+                visaNo: "EV-882310",
+                stayStartDate: "2025-01-01",
+                stayEndDate: "2026-12-31",
+                stayTotalDays: 730,
+                companyName: "Golden Shoe Factory",
+                residenceAddress: "လှည်းကူးမြို့",
+                createdAt: getTodayISO()
+            }
+        ];
+
+        let workers = [];
+        let deletedWorkers = [];
+        let users = [];
+        let currentUser = null;
+
+        window.onload = function() {
+            const savedUsers = localStorage.getItem('hlegu_app_users');
+            users = savedUsers ? JSON.parse(savedUsers) : defaultUsers;
+            localStorage.setItem('hlegu_app_users', JSON.stringify(users));
+
+            const savedWorkers = localStorage.getItem('hlegu_foreign_workers_form_c');
+            workers = savedWorkers ? JSON.parse(savedWorkers) : initialWorkersData;
+
+            const savedDeleted = localStorage.getItem('hlegu_deleted_workers');
+            deletedWorkers = savedDeleted ? JSON.parse(savedDeleted) : [];
+
+            saveToLocalStorage();
+            checkSession();
+        };
+
+        function saveToLocalStorage() {
+            localStorage.setItem('hlegu_foreign_workers_form_c', JSON.stringify(workers));
+            localStorage.setItem('hlegu_deleted_workers', JSON.stringify(deletedWorkers));
+        }
+
+        // --- AUTHENTICATION SYSTEM ---
+        function checkSession() {
+            const session = sessionStorage.getItem('loggedUser');
+            if (session) {
+                currentUser = JSON.parse(session);
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('currentUserDisplay').innerText = `User: ${currentUser.username}`;
+                document.getElementById('currentRoleDisplay').innerText = `Role: ${currentUser.role.toUpperCase()}`;
+                
+                if (currentUser.role === 'admin') {
+                    document.getElementById('adminMgmtBtn').classList.remove('hidden');
+                } else {
+                    document.getElementById('adminMgmtBtn').classList.add('hidden');
+                }
+
+                populateNationFilter();
+                handleSearch();
+                updateStats();
+            } else {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
+
+            const found = users.find(user => user.username === u && user.password === p);
+
+            if (found) {
+                if (found.status !== 'approved') {
+                    showToast("အကောင့်အား Admin မှ အတည်မပြုရသေးပါ။", "warning");
+                    return;
+                }
+                sessionStorage.setItem('loggedUser', JSON.stringify(found));
+                checkSession();
+                showToast("Login အောင်မြင်ပါသည်။", "success");
+            } else {
+                showToast("Username သို့မဟုတ် Password မှားယွင်းနေပါသည်။", "error");
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const u = document.getElementById('regUsername').value.trim();
+            const p = document.getElementById('regPassword').value.trim();
+
+            if (users.some(user => user.username === u)) {
+                showToast("ဤ Username ကို အသုံးပြုပြီးသားဖြစ်ပါသည်။", "warning");
+                return;
+            }
+
+            users.push({ username: u, password: p, role: 'user', status: 'pending' });
+            localStorage.setItem('hlegu_app_users', JSON.stringify(users));
+            showToast("အကောင့်လျှောက်ထားမှု အောင်မြင်ပါသည်။ Admin အတည်ပြုချက်ကို စောင့်ပါ", "success");
+            toggleRegisterView(false);
+        }
+
+        function toggleRegisterView(show) {
+            document.getElementById('registerModal').classList.toggle('hidden', !show);
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('loggedUser');
+            location.reload();
+        }
+
+        // --- ADMIN USER MANAGEMENT ---
+        function openAdminUserModal() {
+            if (currentUser.role !== 'admin') return;
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+
+            users.forEach((u, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2 border font-bold">${u.username}</td>
+                    <td class="p-2 border">${u.role}</td>
+                    <td class="p-2 border text-center">
+                        <span class="px-2 py-0.5 text-[10px] rounded ${u.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${u.status}</span>
+                    </td>
+                    <td class="p-2 border text-center">
+                        ${u.status === 'pending' ? `<button onclick="approveUser(${idx})" class="px-2 py-0.5 bg-emerald-600 text-white rounded text-[10px]">Approve</button>` : ''}
+                        <button onclick="resetUserPassword(${idx})" class="px-2 py-0.5 bg-blue-600 text-white rounded text-[10px] ml-1">Reset Pass</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('adminUserModal').classList.remove('hidden');
+        }
+
+        function closeAdminUserModal() {
+            document.getElementById('adminUserModal').classList.add('hidden');
+        }
+
+        function approveUser(idx) {
+            users[idx].status = 'approved';
+            localStorage.setItem('hlegu_app_users', JSON.stringify(users));
+            openAdminUserModal();
+            showToast("User အား လက်ခံလိုက်ပါပြီ", "success");
+        }
+
+        function resetUserPassword(idx) {
+            const newPass = prompt(`" ${users[idx].username} " အတွက် Password သစ် ရိုက်ထည့်ပါ:`, "");
+            if (newPass) {
+                users[idx].password = newPass;
+                localStorage.setItem('hlegu_app_users', JSON.stringify(users));
+                showToast("Password ပြောင်းလဲပြီးပါပြီ", "success");
+            }
+        }
+
+        // --- OVERSTAY & DATE FILTERS ---
+        function isOverstay(endDateStr) {
+            if (!endDateStr) return false;
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            return new Date(endDateStr) < today;
+        }
+
+        function populateNationFilter() {
+            const select = document.getElementById('nationFilter');
+            const nations = [...new Set(workers.map(w => w.nationality))];
+            select.innerHTML = '<option value="">နိုင်ငံသား အားလုံး</option>';
+            nations.forEach(n => select.innerHTML += `<option value="${n}">${n}</option>`);
+            document.getElementById('stat-nations').innerText = nations.length;
+        }
+
+        function calculateDays() {
+            const start = new Date(document.getElementById('stayStartDate').value);
+            const end = new Date(document.getElementById('stayEndDate').value);
+            if (start && end && end >= start) {
+                const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                document.getElementById('stayTotalDays').value = diff;
+            } else {
+                document.getElementById('stayTotalDays').value = 0;
+            }
+        }
+
+        function clearDateFilter() {
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('recordTypeFilter').value = 'active';
+            handleSearch();
+        }
+
+        function renderTable(dataList, isDeletedView = false) {
+            const tbody = document.getElementById('workerTableBody');
+            const emptyState = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            if (dataList.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            dataList.forEach((worker, index) => {
+                const originalIndex = isDeletedView ? deletedWorkers.indexOf(worker) : workers.indexOf(worker);
+                const overstayed = isOverstay(worker.stayEndDate);
+
+                const tr = document.createElement('tr');
+                tr.className = `border-b border-slate-200 transition-colors ${isDeletedView ? 'bg-slate-100/80 line-through text-slate-400' : overstayed ? 'bg-rose-50/70 hover:bg-rose-100/70' : 'hover:bg-slate-50'}`;
+                
+                tr.innerHTML = `
+                    <td class="p-2.5 text-center font-medium border-r">${index + 1}</td>
+                    <td class="p-2.5 font-bold border-r text-slate-800">${escapeHtml(worker.name)}</td>
+                    <td class="p-2.5 font-mono border-r">${escapeHtml(worker.passportNo)}</td>
+                    <td class="p-2.5 border-r">${escapeHtml(worker.nationality)}</td>
+                    <td class="p-2.5 text-center border-r">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${worker.gender === 'ကျား' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}">
+                            ${escapeHtml(worker.gender)}
+                        </span>
+                    </td>
+                    <td class="p-2.5 font-mono border-r">${escapeHtml(worker.visaNo)}</td>
+                    <td class="p-2.5 text-center font-mono border-r">${formatDate(worker.stayStartDate)}</td>
+                    <td class="p-2.5 text-center font-mono border-r">${formatDate(worker.stayEndDate)}</td>
+                    <td class="p-2.5 text-center font-semibold border-r">${worker.stayTotalDays || 0} ရက်</td>
+                    <td class="p-2.5 text-center border-r">
+                        ${overstayed 
+                            ? `<span class="px-2 py-0.5 bg-rose-600 text-white font-bold rounded text-[10px]">Overstay</span>` 
+                            : `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold rounded text-[10px]">Valid</span>`
+                        }
+                    </td>
+                    <td class="p-2.5 text-center text-xs border-r font-mono">
+                        ${isDeletedView ? `ပယ်ဖျက်: ${formatDate(worker.deletedAt)}` : `ဖြည့်သွင်း: ${formatDate(worker.createdAt)}`}
+                    </td>
+                    <td class="p-2.5 border-r font-semibold">${escapeHtml(worker.companyName)}</td>
+                    <td class="p-2.5 text-center no-print">
+                        <div class="flex items-center justify-center gap-1">
+                            ${!isDeletedView ? `
+                            <button onclick="editWorker(${originalIndex})" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="ပြင်ဆင်မည်">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            ${currentUser && currentUser.role === 'admin' ? `
+                            <button onclick="deleteWorker(${originalIndex})" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded" title="ပယ်ဖျက်မည်">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>` : ''}
+                            ` : `<span class="text-xs text-rose-500 font-bold">ပယ်ဖျက်ပြီး</span>`}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = workers.length;
+            document.getElementById('stat-male').innerText = workers.filter(w => w.gender === 'ကျား').length;
+            document.getElementById('stat-female').innerText = workers.filter(w => w.gender === 'မ').length;
+            document.getElementById('stat-overstay').innerText = workers.filter(w => isOverstay(w.stayEndDate)).length;
+            document.getElementById('stat-deleted').innerText = deletedWorkers.length;
+        }
+
+        // --- ADVANCED FILTER WITH DATE & RECORD TYPE ---
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const genderFilter = document.getElementById('genderFilter').value;
+            const nationFilter = document.getElementById('nationFilter').value;
+            const overstayFilter = document.getElementById('overstayFilter').value;
+            
+            const recordType = document.getElementById('recordTypeFilter').value; // active or deleted
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            const targetList = recordType === 'deleted' ? deletedWorkers : workers;
+
+            const filtered = targetList.filter(w => {
+                const matchQuery = !query || 
+                    w.name.toLowerCase().includes(query) ||
+                    w.passportNo.toLowerCase().includes(query) ||
+                    w.companyName.toLowerCase().includes(query);
+
+                const matchGender = !genderFilter || w.gender === genderFilter;
+                const matchNation = !nationFilter || w.nationality === nationFilter;
+
+                const overstayed = isOverstay(w.stayEndDate);
+                let matchOverstay = true;
+                if (overstayFilter === 'overstay') matchOverstay = overstayed;
+                if (overstayFilter === 'valid') matchOverstay = !overstayed;
+
+                // Date Filtering (Created Date or Deleted Date)
+                const targetDate = recordType === 'deleted' ? w.deletedAt : w.createdAt;
+                let matchDate = true;
+                if (dateFrom && targetDate) matchDate = matchDate && (targetDate >= dateFrom);
+                if (dateTo && targetDate) matchDate = matchDate && (targetDate <= dateTo);
+
+                return matchQuery && matchGender && matchNation && matchOverstay && matchDate;
+            });
+
+            renderTable(filtered, recordType === 'deleted');
+        }
+
+        // --- CRUD OPERATIONS ---
+        function openFormModal(editIdx = -1) {
+            document.getElementById('workerForm').reset();
+            document.getElementById('editIndex').value = editIdx;
+
+            if (editIdx >= 0) {
+                const w = workers[editIdx];
+                document.getElementById('modalTitle').innerText = "စာရင်း အချက်အလက် ပြင်ဆင်ခြင်း";
+                document.getElementById('name').value = w.name;
+                document.getElementById('passportNo').value = w.passportNo;
+                document.getElementById('nationality').value = w.nationality;
+                document.getElementById('gender').value = w.gender;
+                document.getElementById('visaNo').value = w.visaNo;
+                document.getElementById('stayStartDate').value = w.stayStartDate || '';
+                document.getElementById('stayEndDate').value = w.stayEndDate || '';
+                document.getElementById('stayTotalDays').value = w.stayTotalDays || 0;
+                document.getElementById('companyName').value = w.companyName;
+                document.getElementById('residenceAddress').value = w.residenceAddress;
+            } else {
+                document.getElementById('modalTitle').innerText = "စာရင်းသစ် ထည့်သွင်းခြင်း";
+            }
+            document.getElementById('formModal').classList.remove('hidden');
+        }
+
+        function closeFormModal() {
+            document.getElementById('formModal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const editIdx = parseInt(document.getElementById('editIndex').value);
+
+            const data = {
+                name: document.getElementById('name').value.trim(),
+                passportNo: document.getElementById('passportNo').value.trim().toUpperCase(),
+                nationality: document.getElementById('nationality').value.trim(),
+                gender: document.getElementById('gender').value,
+                visaNo: document.getElementById('visaNo').value.trim(),
+                stayStartDate: document.getElementById('stayStartDate').value,
+                stayEndDate: document.getElementById('stayEndDate').value,
+                stayTotalDays: parseInt(document.getElementById('stayTotalDays').value) || 0,
+                companyName: document.getElementById('companyName').value.trim(),
+                residenceAddress: document.getElementById('residenceAddress').value.trim(),
+                createdAt: editIdx >= 0 ? workers[editIdx].createdAt : getTodayISO()
+            };
+
+            if (editIdx >= 0) {
+                workers[editIdx] = data;
+                showToast("ပြင်ဆင်မှု အောင်မြင်ပါသည်", "success");
+            } else {
+                workers.unshift(data);
+                showToast("စာရင်းသစ် ထည့်သွင်းပြီးပါပြီ", "success");
+            }
+
+            saveToLocalStorage();
+            populateNationFilter();
+            handleSearch();
+            updateStats();
+            closeFormModal();
+        }
+
+        function editWorker(idx) { openFormModal(idx); }
+
+        function deleteWorker(idx) {
+            if (currentUser.role !== 'admin') {
+                showToast("Admin သာလျှင် စာရင်း ပယ်ဖျက်နိုင်ပါသည်။", "warning");
+                return;
+            }
+            if (confirm("ဤစာရင်းအား ပယ်ဖျက်ရန် သေချာပါသလား?")) {
+                const deletedItem = workers.splice(idx, 1)[0];
+                deletedItem.deletedAt = getTodayISO();
+                deletedWorkers.unshift(deletedItem);
+
+                saveToLocalStorage();
+                populateNationFilter();
+                handleSearch();
+                updateStats();
+                showToast("စာရင်း ပယ်ဖျက်လိုက်ပါပြီ (Deleted Log တွင် ပြန်ကြည့်နိုင်သည်)", "info");
+            }
+        }
+
+        // --- EXCEL IMPORT / EXPORT ---
+        function importFromExcel(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+
+                if (json.length > 0) {
+                    let count = 0;
+                    json.forEach(row => {
+                        workers.unshift({
+                            name: row["အမည်"] || row["Name"] || "Unknown",
+                            passportNo: row["Passport No"] || row["Passport"] || "-",
+                            nationality: row["လူမျိုး/နိုင်ငံသား"] || row["Nationality"] || "မသိရှိ",
+                            gender: row["ကျား/မ"] || row["Gender"] || "ကျား",
+                            visaNo: row["Visa အမှတ်"] || row["Visa No"] || "-",
+                            stayStartDate: row["နေခွင့်သက်တမ်း (မှ)"] || "",
+                            stayEndDate: row["နေခွင့်သက်တမ်း (ထိ)"] || "",
+                            stayTotalDays: parseInt(row["နေခွင့်သက်တမ်း (ရက်ပေါင်း)"]) || 0,
+                            companyName: row["စက်ရုံ/ကုမ္ပဏီအမည်"] || row["Company"] || "-",
+                            residenceAddress: row["တည်းခိုနေထိုင်သည့် လိပ်စာ"] || row["Address"] || "-",
+                            createdAt: getTodayISO()
+                        });
+                        count++;
+                    });
+                    saveToLocalStorage();
+                    populateNationFilter();
+                    handleSearch();
+                    updateStats();
+                    showToast(`Excel မှ စာရင်း ${count} ခု ထည့်သွင်းပြီးပါပြီ`, "success");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportToExcel() {
+            if (workers.length === 0) return;
+            const worksheet = XLSX.utils.json_to_sheet(workers);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Form_C_Foreign_Workers");
+            XLSX.writeFile(workbook, `Hlegu_Foreign_Workers_${getTodayISO()}.xlsx`);
+            showToast("Excel ဖိုင် ထုတ်ယူပြီးပါပြီ", "success");
+        }
+
+        function triggerPrint() { window.print(); }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const p = dateStr.split('-');
+            return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : dateStr;
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : type === 'error' ? 'bg-rose-600' : 'bg-slate-800';
+            toast.className = `px-4 py-2.5 rounded-xl shadow-lg text-white ${bg} text-xs font-bold transition-all duration-300`;
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
