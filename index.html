@@ -857,5 +857,45 @@
             setTimeout(() => toast.remove(), 3000);
         }
     </script>
+<!-- Firebase Configuration & Firestore Realtime Sync -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDjasubIH0TKFnbRcG0KOiCOEHrer8lMYE",
+    authDomain: "than-zaw-62426.firebaseapp.com",
+    projectId: "than-zaw-62426",
+    storageBucket: "than-zaw-62426.firebasestorage.app",
+    messagingSenderId: "907262691031",
+    appId: "1:907262691031:web:0fec49c92b10b0fb445292"
+  };
+
+  // Firebase & Firestore စတင်လည်ပတ်ခြင်း
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 1. Realtime Data Listener (Database ထဲ ဒေတာပြောင်းတာနဲ့ အလိုအလျောက် ပေါ်လာမည်)
+  onSnapshot(collection(db, "messages"), (snapshot) => {
+    console.log("--- Realtime Data Updated ---");
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        console.log("ဒေတာအသစ်ရောက်ရှိ:", change.doc.data());
+      }
+    });
+  });
+
+  window.sendData = async function(textMessage) {
+    try {
+        await addDoc(collection(db, "messages"), {
+            text: textMessage || "Hello Firebase Realtime!",
+            createdAt: serverTimestamp()
+        });
+        console.log("Database ထဲသို့ ဒေတာ သိမ်းဆည်းပြီးပါပြီ!");
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
+  };
+</script>
 </body>
 </html>
